@@ -10,12 +10,12 @@ class WeekDayWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.only(top: 10, bottom: 6),
       child: WeekDayTile(
         dayIndex: dayIndex,
         textStyle: const TextStyle(
           fontWeight: FontWeight.bold,
-          fontSize: 16,
+          fontSize: 14,
         ),
         displayBorder: false,
         weekDayStringBuilder: (index) => _weekDays[index],

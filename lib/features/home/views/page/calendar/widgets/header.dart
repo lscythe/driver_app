@@ -16,30 +16,27 @@ class HeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 0, 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            _dateFormatter.format(date),
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          _dateFormatter.format(date),
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
           ),
-          Row(
-            children: [
-              IconButton(
-                  onPressed: onChevronLeftTap,
-                  icon: const Icon(Icons.chevron_left)),
-              IconButton(
-                  onPressed: onChevronRightTap,
-                  icon: const Icon(Icons.chevron_right))
-            ],
-          )
-        ],
-      ),
+        ),
+        Row(
+          children: [
+            IconButton(
+                onPressed: onChevronLeftTap,
+                icon: const Icon(Icons.chevron_left, size: 28,)),
+            IconButton(
+                onPressed: onChevronRightTap,
+                icon: const Icon(Icons.chevron_right, size: 28,))
+          ],
+        )
+      ],
     );
   }
 }

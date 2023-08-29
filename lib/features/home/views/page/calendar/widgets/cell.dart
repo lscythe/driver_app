@@ -40,7 +40,7 @@ class CellWidget extends StatelessWidget {
           child: Container(
             decoration: isToday
                 ? const BoxDecoration(
-                    color: Colors.blueGrey,
+                    color: Color(0xFFbdc3de),
                     shape: BoxShape.circle,
                   )
                 : null,
@@ -52,12 +52,17 @@ class CellWidget extends StatelessWidget {
                   Text(
                     _dateFormatter.format(date),
                     style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
                         color: _getCellTextColor(schedules)),
                   ),
                   _getEventName(schedules) != null
-                      ? Text(_getEventName(schedules) ?? "")
+                      ? Flexible(
+                      fit: FlexFit.loose,
+                          child: Text(
+                          _getEventName(schedules) ?? "",
+                          style: const TextStyle(fontSize: 10),
+                        ))
                       : Container()
                 ],
               ),
@@ -70,19 +75,19 @@ class CellWidget extends StatelessWidget {
 
   Color _getCellBackgroundColor(List<Schedule> schedules) {
     if (schedules.any((e) => e.status == ScheduleStatus.assigned)) {
-      return Colors.blue;
+      return const Color(0xFF4d5fa9);
     } else if (schedules.any((e) => e.status == ScheduleStatus.sickLeave)) {
-      return Colors.red.shade400;
+      return const Color(0xFFffb9a7);
     } else if (schedules.any((e) => e.status == ScheduleStatus.leave)) {
-      return Colors.greenAccent;
+      return const Color(0xFFebfecc);
     } else if (schedules.any((e) => e.status == ScheduleStatus.unpaidLeave)) {
-      return Colors.lightBlueAccent.shade200;
+      return const Color(0xFFd2f8ff);
     } else if (schedules.any((e) => e.status == ScheduleStatus.standby)) {
-      return Colors.yellow;
+      return const Color(0xFFfffc00);
     } else if (isInMonth) {
       return Colors.white;
     } else {
-      return Colors.grey.shade300;
+      return const Color(0xFFf2f6f8);
     }
   }
 
@@ -101,12 +106,14 @@ class CellWidget extends StatelessWidget {
   Color _getCellTextColor(List<Schedule> schedules) {
     if (schedules.any((e) => e.status == ScheduleStatus.assigned)) {
       return Colors.white;
-    } else if (!isInMonth) {
-      return Colors.grey.shade500;
-    } else if (isToday) {
-      return Colors.white;
-    } else {
+    } else if (!isInMonth && isToday) {
       return Colors.black;
+    } else if (isToday) {
+      return Colors.black;
+    } else if (isInMonth) {
+      return Colors.black;
+    } else {
+      return const Color(0xFFc0c4c6);
     }
   }
 }

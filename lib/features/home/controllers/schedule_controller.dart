@@ -58,4 +58,11 @@ class ScheduleController extends GetxController {
         .toList());
     print(result);
   }
+
+  @override
+  void dispose() {
+    dateController.dispose();
+    dayController.dispose();
+    super.dispose();
+  }
 }
