@@ -108,7 +108,7 @@ packages:
   calendar_view:
     dependency: "direct main"
     description:
-      path: flutter_calendar_view
+      path: "libraries/flutter_calendar_view"
       relative: true
     source: path
     version: "1.0.4"

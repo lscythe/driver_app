@@ -1,0 +1,271 @@
+Subject: [PATCH] update calendar and dialog
+---
+Index: lib/src/extensions.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lib/src/extensions.dart b/lib/src/extensions.dart
+--- a/lib/src/extensions.dart	(revision 6ae180077df06339e1a5174b5acc7655584b4191)
++++ b/lib/src/extensions.dart	(revision 5b8fca217f7a6bec47de2bd45149a1e3b17b276c)
+@@ -44,6 +44,14 @@
+               7)
+           .ceil();
+ 
++  DateTime firstDayOfMonth() => DateTime(year, month, 1);
++
++  DateTime lastDayOfMonth() {
++    final date =
++        month < 12 ? DateTime(year, month + 1, 1) : DateTime(year + 1, 1, 1);
++    return date.subtract(Duration(days: 1));
++  }
++
+   /// Returns The List of date of Current Week, all of the dates will be without
+   /// time.
+   /// Day will start from Monday to Sunday.
+@@ -87,9 +95,12 @@
+   /// All the dates are week based that means it will return array of size 42
+   /// which will contain 6 weeks that is the maximum number of weeks a month
+   /// can have.
+-  List<DateTime> datesOfMonths({WeekDays startDay = WeekDays.monday}) {
++  List<DateTime> datesOfMonths({
++    WeekDays startDay = WeekDays.monday,
++    int index = 7,
++  }) {
+     final monthDays = <DateTime>[];
+-    for (var i = 1, start = 1; i < 7; i++, start += 7) {
++    for (var i = 1, start = 1; i < index; i++, start += 7) {
+       monthDays
+           .addAll(DateTime(year, month, start).datesOfWeek(start: startDay));
+     }
+Index: lib/src/month_view/month_view.dart
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/lib/src/month_view/month_view.dart b/lib/src/month_view/month_view.dart
+--- a/lib/src/month_view/month_view.dart	(revision 6ae180077df06339e1a5174b5acc7655584b4191)
++++ b/lib/src/month_view/month_view.dart	(revision 5b8fca217f7a6bec47de2bd45149a1e3b17b276c)
+@@ -138,6 +138,8 @@
+   /// Option for SafeArea.
+   final SafeAreaOption safeAreaOption;
+ 
++  final double cellHeight;
++
+   /// Main [Widget] to display month view.
+   const MonthView({
+     Key? key,
+@@ -166,6 +168,7 @@
+     this.weekDayStringBuilder,
+     this.headerStyle = const HeaderStyle(),
+     this.safeAreaOption = const SafeAreaOption(),
++    this.cellHeight = 300,
+   }) : super(key: key);
+ 
+   @override
+@@ -284,73 +287,81 @@
+       child: SizedBox(
+         width: _width,
+         child: Column(
++          mainAxisSize: MainAxisSize.min,
+           crossAxisAlignment: CrossAxisAlignment.start,
+           children: [
+             Container(
+               width: _width,
+               child: _headerBuilder(_currentDate),
+             ),
+-            Expanded(
+-              child: PageView.builder(
+-                controller: _pageController,
+-                onPageChanged: _onPageChange,
+-                itemBuilder: (_, index) {
+-                  final date = DateTime(_minDate.year, _minDate.month + index);
+-                  final weekDays = date.datesOfWeek(start: widget.startDay);
++            Flexible(
++              fit: FlexFit.loose,
++              child: Container(
++                height: widget.cellHeight,
++                child: PageView.builder(
++                  controller: _pageController,
++                  onPageChanged: _onPageChange,
++                  scrollDirection: Axis.horizontal,
++                  itemBuilder: (_, index) {
++                    final date = DateTime(_minDate.year, _minDate.month + index);
++                    final weekDays = date.datesOfWeek(start: widget.startDay);
+ 
+-                  return Column(
+-                    mainAxisSize: MainAxisSize.min,
+-                    crossAxisAlignment: CrossAxisAlignment.start,
+-                    children: [
+-                      Container(
+-                        width: _width,
+-                        child: Row(
+-                          children: List.generate(
+-                            7,
+-                            (index) => Expanded(
+-                              child: SizedBox(
+-                                width: _cellWidth,
+-                                child:
+-                                    _weekBuilder(weekDays[index].weekday - 1),
+-                              ),
+-                            ),
+-                          ),
+-                        ),
+-                      ),
+-                      Expanded(
+-                        child: LayoutBuilder(builder: (context, constraints) {
+-                          final _cellAspectRatio =
+-                              widget.useAvailableVerticalSpace
+-                                  ? calculateCellAspectRatio(
+-                                      constraints.maxHeight,
+-                                    )
+-                                  : widget.cellAspectRatio;
++                    return Column(
++                      mainAxisSize: MainAxisSize.min,
++                      crossAxisAlignment: CrossAxisAlignment.start,
++                      children: [
++                        Container(
++                          width: _width,
++                          child: Row(
++                            children: List.generate(
++                              7,
++                              (index) => Flexible(
++                                fit: FlexFit.loose,
++                                child: SizedBox(
++                                  width: _cellWidth,
++                                  child:
++                                      _weekBuilder(weekDays[index].weekday - 1),
++                                ),
++                              ),
++                            ),
++                          ),
++                        ),
++                        Flexible(
++                          fit: FlexFit.loose,
++                          child: LayoutBuilder(builder: (context, constraints) {
++                            final _cellAspectRatio =
++                                widget.useAvailableVerticalSpace
++                                    ? calculateCellAspectRatio(
++                                        constraints.maxHeight,
++                                      )
++                                    : widget.cellAspectRatio;
+ 
+-                          return SizedBox(
+-                            height: _height,
+-                            width: _width,
+-                            child: _MonthPageBuilder<T>(
+-                              key: ValueKey(date.toIso8601String()),
+-                              onCellTap: widget.onCellTap,
+-                              onDateLongPress: widget.onDateLongPress,
+-                              width: _width,
+-                              height: _height,
+-                              controller: controller,
+-                              borderColor: widget.borderColor,
+-                              borderSize: widget.borderSize,
+-                              cellBuilder: _cellBuilder,
+-                              cellRatio: _cellAspectRatio,
+-                              date: date,
+-                              showBorder: widget.showBorder,
+-                              startDay: widget.startDay,
+-                            ),
+-                          );
+-                        }),
+-                      ),
+-                    ],
+-                  );
+-                },
+-                itemCount: _totalMonths,
++                            return SizedBox(
++                              height: _height,
++                              width: _width,
++                              child: _MonthPageBuilder<T>(
++                                key: ValueKey(date.toIso8601String()),
++                                onCellTap: widget.onCellTap,
++                                onDateLongPress: widget.onDateLongPress,
++                                width: _width,
++                                height: _height,
++                                controller: controller,
++                                borderColor: widget.borderColor,
++                                borderSize: widget.borderSize,
++                                cellBuilder: _cellBuilder,
++                                cellRatio: _cellAspectRatio,
++                                date: date,
++                                showBorder: widget.showBorder,
++                                startDay: widget.startDay,
++                              ),
++                            );
++                          }),
++                        ),
++                      ],
++                    );
++                  },
++                  itemCount: _totalMonths,
++                ),
+               ),
+             ),
+           ],
+@@ -381,7 +392,7 @@
+     _width = widget.width ?? MediaQuery.of(context).size.width;
+     _cellWidth = _width / 7;
+     _cellHeight = _cellWidth / widget.cellAspectRatio;
+-    _height = _cellHeight * 6;
++    _height = _cellHeight * 10;
+   }
+ 
+   double calculateCellAspectRatio(double height) {
+@@ -607,7 +618,10 @@
+ 
+   @override
+   Widget build(BuildContext context) {
+-    final monthDays = date.datesOfMonths(startDay: startDay);
++    final monthDays = date.datesOfMonths(
++      startDay: startDay,
++      index: _getItemCount(date, weekday: startDay),
++    );
+     return Container(
+       width: width,
+       height: height,
+@@ -618,7 +632,7 @@
+           crossAxisCount: 7,
+           childAspectRatio: cellRatio,
+         ),
+-        itemCount: 42,
++        itemCount: monthDays.length,
+         shrinkWrap: true,
+         itemBuilder: (context, index) {
+           final events = controller.getEventsOnDay(monthDays[index]);
+@@ -647,3 +661,34 @@
+     );
+   }
+ }
++
++int _getItemCount(DateTime date, {WeekDays weekday = WeekDays.monday}) {
++  final first = date.firstDayOfMonth();
++  final daysBefore = _getDaysBefore(first, weekday: weekday);
++  final firstToDisplay = first.subtract(Duration(days: daysBefore));
++
++  final last = date.lastDayOfMonth();
++  final daysAfter = _getDaysAfter(last, weekday: weekday);
++  final lastToDisplay = last.add(Duration(days: daysAfter));
++
++  return (lastToDisplay.difference(firstToDisplay).inDays + 1) ~/ 7;
++}
++
++int _getDaysBefore(DateTime firstDay, {WeekDays weekday = WeekDays.monday}) {
++  return (firstDay.weekday + 7 - _getWeekdayNumber(start: weekday) % 7);
++}
++
++int _getDaysAfter(DateTime lastDay, {WeekDays weekday = WeekDays.monday}) {
++  int invertedStartingWeekday = 8 - _getWeekdayNumber(start: weekday);
++
++  int daysAfter = 7 - ((lastDay.weekday + invertedStartingWeekday) % 7);
++  if (daysAfter == 7) {
++    daysAfter = 0;
++  }
++
++  return daysAfter;
++}
++
++int _getWeekdayNumber({WeekDays start = WeekDays.monday}) {
++  return WeekDays.values.indexOf(start) + 1;
++}
